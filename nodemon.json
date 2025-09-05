@@ -1,0 +1,4 @@
+{
+    "watch": ["./formPostmanImport.mjs"],
+    "exec": "node ./formPostmanImport.mjs > cat.json"
+}

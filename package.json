@@ -1,0 +1,27 @@
+{
+	"name": "xml-to-postman",
+	"version": "1.0.0",
+	"description": "a simple package to parse xml files to a postman collection.",
+	"keywords": [
+		"xml-to-postman-collection"
+	],
+	"license": "ISC",
+	"author": "_k8pai",
+	"type": "module",
+	"main": "dist/index.js",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"test": "nodemon",
+		"build": "tsup src/index.ts --format cjs,esm --dts --out-dir dist --clean",
+		"lint": "tsc"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.29.6",
+		"tsup": "^8.5.0",
+		"typescript": "^5.9.2"
+	},
+	"dependencies": {
+		"fast-xml-parser": "^5.2.5"
+	}
+}
