@@ -1,4 +1,4 @@
 {
-    "watch": ["./formPostmanImport.mjs"],
-    "exec": "node ./formPostmanImport.mjs > cat.json"
+	"watch": ["dist/index.js"],
+	"exec": "node dist/index.js > cat.json"
 }

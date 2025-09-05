@@ -14,10 +14,12 @@
 	"scripts": {
 		"test": "nodemon",
 		"build": "tsup src/index.ts --format cjs,esm --dts --out-dir dist --clean",
-		"lint": "tsc"
+		"lint": "tsc",
+		"dev": "tsup --config tsup.config.ts --watch"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.29.6",
+		"@types/node": "^24.3.1",
 		"tsup": "^8.5.0",
 		"typescript": "^5.9.2"
 	},
