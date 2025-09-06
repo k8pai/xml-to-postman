@@ -8,14 +8,17 @@
 	"license": "ISC",
 	"author": "_k8pai",
 	"type": "module",
-	"main": "dist/index.js",
-	"module": "dist/index.mjs",
-	"types": "dist/index.d.ts",
+	"main": "dist/src/index.cjs",
+	"module": "dist/src/index.js",
+	"types": "dist/src/index.d.ts",
+	"bin": {
+		"xpc": "./dist/scripts/xpc.js"
+	},
 	"scripts": {
 		"test": "nodemon",
-		"build": "tsup src/index.ts --format cjs,esm --dts --out-dir dist --clean",
 		"lint": "tsc",
-		"dev": "tsup --config tsup.config.ts --watch"
+		"build": "tsup --config tsup.config.ts",
+		"dev": "tsup --config tsup.config.ts --watch --clean"
 	},
 	"devDependencies": {
 		"@changesets/cli": "^2.29.6",
@@ -24,6 +27,7 @@
 		"typescript": "^5.9.2"
 	},
 	"dependencies": {
+		"commander": "^14.0.0",
 		"fast-xml-parser": "^5.2.5"
 	}
 }
