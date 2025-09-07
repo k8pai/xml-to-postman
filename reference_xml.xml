@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns:interface xmlns:ns="http://example.org/prod"
+              name="item_detail" db_schema_name="'INVENTORY'" package="some.sample.package.inventory">
+    <documentation>
+        Interface to carry out CRUD (maintenance) operations of an item object.
+        For update methods, it is expected that the client first calls the "fetch"
+        method and then submits the modified item record appropriately.
+    </documentation>
+
+    <method name="fetch" transactional="false" http_method="GET">
+        <documentation>
+            fetch:
+
+            Inputs:
+                org_id and item_identifier (mandatory)
+
+            Outputs:
+                item_detail object of the given org_id and item_identifier
+
+            Description:
+                Retrieves an item_detail object for the given org_id and item_identifier
+
+            Errors:
+                Throws errors in case of invalid or missing inputs
+                Throws errors if the item record does not exist
+        </documentation>
+        <query_param namespace="http://example_primitives.com" name="org_id" mandatory="true"/>
+        <query_param namespace="http://example_primitives.com" name="item_identifier" mandatory="true"/>
+        <output namespace="http://example_composites.com" name="item_detail"/>
+    </method>
+
+    <method name="add" transactional="true" http_method="POST">
+        <documentation>
+            add:
+
+            Inputs:
+                item_detail
+
+            Outputs:
+                None
+
+            Description:
+                Adds a new item_detail object
+
+            Errors:
+                Throws errors if the input is invalid or missing
+                Throws errors if the item already exists
+        </documentation>
+        <input namespace="http://example_composites.com" name="item_detail"/>
+    </method>
+
+    <method name="modify" transactional="true" http_method="PUT">
+        <documentation>
+            modify:
+
+            Inputs:
+                item_detail of the given item_identifier
+
+            Outputs:
+                None
+
+            Description:
+                Updates an item_detail object in the Inventory database
+
+            Errors:
+                Throws errors if the input is invalid or missing
+                Throws errors if the item does not exist
+        </documentation>
+        <input namespace="http://example_composites.com" name="item_detail"/>
+    </method>
+
+    <method name="delete" transactional="true" http_method="PUT">
+        <documentation>
+            delete:
+
+            Inputs:
+                item_detail of the given item_identifier
+
+            Outputs:
+                None
+
+            Description:
+                Marks an item_detail object in the Inventory database as deleted
+
+            Errors:
+                Throws errors if the input is invalid or missing
+                Throws errors if the item does not exist
+        </documentation>
+        <input namespace="http://example_composites.com" name="item_detail"/>
+    </method>
+
+    <method name="undelete" transactional="true" http_method="PUT">
+        <documentation>
+            undelete:
+
+            Inputs:
+                item_detail of the given item_identifier
+
+            Outputs:
+                None
+
+            Description:
+                Marks an item_detail object in the Inventory database as not deleted
+
+            Errors:
+                Throws errors if the input is invalid or missing
+                Throws errors if the item does not exist
+        </documentation>
+        <input namespace="http://example_composites.com" name="item_detail"/>
+    </method>
+
+    <method name="list" transactional="true" http_method="GET">
+        <documentation>
+            list:
+
+            Inputs:
+                query_params with one or more of
+                item_identifier, item_name, category, price_range, availability
+
+            Outputs:
+                List of item_detail objects matching the input criteria
+
+            Description:
+                Retrieves a list of matching item_detail records
+
+            Errors:
+                Throws errors in case of invalid or missing inputs
+        </documentation>
+        <query_param namespace="http://example_primitives.com" name="offset"/>
+        <query_param namespace="http://example_primitives.com" name="num_recs"/>
+        <query_param namespace="http://example_primitives.com" name="org_id"/>
+        <query_param namespace="http://example_primitives.com" name="item_identifier"/>
+        <query_param namespace="http://example_primitives.com" name="item_name"/>
+        <query_param namespace="http://example_primitives.com" name="category"/>
+        <query_param namespace="http://example_primitives.com" name="price_min"/>
+        <query_param namespace="http://example_primitives.com" name="price_max"/>
+        <query_param namespace="http://example_primitives.com" name="availability"/>
+        <query_param namespace="http://example_primitives.com" name="deleted"/>
+        <output namespace="http://example_composites.com" name="item_details"/>
+    </method>
+</ns:interface>
