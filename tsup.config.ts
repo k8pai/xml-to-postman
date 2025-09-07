@@ -12,7 +12,7 @@ const entries = includeFolders.flatMap((folder) => {
 });
 
 export default defineConfig({
-  entry: ["src/index.ts", ...entries],
+  entry: ["src/index.ts", "src/types.ts", ...entries],
   format: ["esm", "cjs"],
   dts: true,
   clean: true,
