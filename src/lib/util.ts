@@ -128,17 +128,17 @@ const processXmlConfig = (
   } as AffirmedXmlConfigurationType;
 };
 
-type extractXmlContentsType =
+type extractJsonContentsType =
   | undefined
   | {
       interfaceData: Record<string, any>;
       methodData: any[];
     };
-const extractXmlContents = (
+const extractJsonContents = (
   jsonContent: any,
   xmlConfig: AffirmedXmlConfigurationType,
   file: string
-): extractXmlContentsType => {
+): extractJsonContentsType => {
   let interfaceData = jsonContent[xmlConfig.interfaceTag];
 
   if (!interfaceData || !interfaceData.name) {
@@ -192,7 +192,7 @@ export const formServiceRoutines = ({
 
         if (extname(file) === ".xml") {
           const jsonContent = convertXmlToJson(filePath);
-          const extractedContents = extractXmlContents(
+          const extractedContents = extractJsonContents(
             jsonContent,
             xmlConfig as AffirmedXmlConfigurationType,
             file
