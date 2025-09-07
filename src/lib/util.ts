@@ -132,10 +132,13 @@ export const formServiceRoutines = ({
           return;
         }
 
-        const interfaceName = interfaceData.name as string;
+        let folderName = interfaceData.name as string;
 
+        if (relativeDirectoryFromPath !== "") {
+          folderName = join(relativeDirectoryFromPath, folderName);
+        }
         let record: PostmanCollectionFolderType = {
-          name: interfaceName,
+          name: folderName,
           item: [],
           event: [],
         };
