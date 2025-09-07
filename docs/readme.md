@@ -8,10 +8,10 @@ This document describes the XML interface specification for managing `item_detai
 
 ### `<ns:interface>`
 - **Attributes:**
-  - `xmlns:ns`: XML namespace (`http://evpoco.tekenlight.org/idl_spec`)
+  - `xmlns:ns`: XML namespace (`http://example.org/prod`)
   - `name`: Interface name (`item_detail`)
   - `db_schema_name`: Database schema (`'INVENTORY'`)
-  - `package`: Logical package grouping (`biop.inventory`)
+  - `package`: Logical package grouping (`some.sample.package.inventory`)
 - **Purpose:** Declares the interface and its scope.
 
 ---
@@ -37,7 +37,7 @@ This document describes the XML interface specification for managing `item_detai
 
 ### `<query_param>`
 - **Attributes:**
-  - `namespace`: Namespace for primitive data types (e.g., `http://primitives.biop.com`)
+  - `namespace`: Namespace for primitive data types (e.g., `http://example_primitives.com`)
   - `name`: Parameter name (`org_id`, `item_identifier`, etc.)
   - `mandatory`: Optional attribute (`true`/`false`)
 - **Purpose:** Declares input query parameters for filtering or identification.
