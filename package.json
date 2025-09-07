@@ -1,34 +1,36 @@
 {
-	"name": "xml-to-postman",
-	"version": "1.0.1",
-	"description": "a simple package to parse xml files to a postman collection.",
-	"keywords": [
-		"xml-to-postman-collection"
-	],
-	"license": "ISC",
-	"author": "_k8pai",
-	"type": "module",
-	"main": "dist/src/index.cjs",
-	"module": "dist/src/index.js",
-	"types": "dist/src/index.d.ts",
-	"bin": {
-		"xpc": "./dist/scripts/xpc.js"
-	},
-	"scripts": {
-		"test": "nodemon",
-		"lint": "tsc",
-		"build": "tsup --config tsup.config.ts",
-		"dev": "tsup --config tsup.config.ts --watch --clean"
-	},
-	"devDependencies": {
-		"@changesets/cli": "^2.29.6",
-		"@types/node": "^24.3.1",
-		"tsup": "^8.5.0",
-		"typescript": "^5.9.2"
-	},
-	"dependencies": {
-		"commander": "^14.0.0",
-		"fast-xml-parser": "^5.2.5",
-		"zod": "^4.1.5"
-	}
+  "name": "xml-to-postman",
+  "version": "1.0.1",
+  "description": "a simple package to parse xml files to a postman collection.",
+  "keywords": [
+    "xml-to-postman-collection"
+  ],
+  "license": "ISC",
+  "author": "_k8pai",
+  "type": "module",
+  "main": "dist/src/index.cjs",
+  "module": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "bin": {
+    "xpc": "./dist/scripts/xpc.js"
+  },
+  "scripts": {
+    "test": "nodemon",
+    "lint": "tsc",
+    "build": "tsup --config tsup.config.ts",
+    "dev": "tsup --config tsup.config.ts --watch --clean",
+    "release": "npm run build && changeset publish",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.6",
+    "@types/node": "^24.3.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "fast-xml-parser": "^5.2.5",
+    "zod": "^4.1.5"
+  }
 }
