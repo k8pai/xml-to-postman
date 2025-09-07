@@ -12,7 +12,7 @@ export const XpgConfigurationSchema = z.object({
   modules: z.array(
     z.object({
       prefix: z.string().or(z.undefined()),
-      name: z.undefined().or(z.string()),
+      name: z.string().or(z.undefined()),
       directory: z.string(),
       baseUrl: z.string(),
     })
