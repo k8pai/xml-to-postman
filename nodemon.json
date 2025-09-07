@@ -1,4 +1,4 @@
 {
-  "watch": ["src/scripts/xpc.ts", "src/lib/util.ts"],
+  "watch": ["src/scripts/xpc.ts", "src/lib/util.ts", "xpc.config.js"],
   "exec": "xpc"
 }

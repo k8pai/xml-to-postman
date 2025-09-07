@@ -7,19 +7,7 @@ export const xpcConfig = {
       prefix: "sub",
       name: "Subscriber",
       baseUrl: "baseurl",
-      directory: "../../product/biop_schema/idl/subscriber",
-    },
-    {
-      prefix: "roc",
-      name: "Registrar",
-      baseUrl: "registrarurl",
-      directory: "../../product/biop_schema/idl/registrar",
-    },
-    {
-      prefix: "aaa",
-      name: "AAA",
-      baseUrl: "aaaurl",
-      directory: "../../product/biop_schema/idl/aaa",
+      directory: "./docs",
     },
   ],
   variables: {
