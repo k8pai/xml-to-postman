@@ -2,11 +2,14 @@ import { XMLParser } from "fast-xml-parser";
 import { readdirSync, readFileSync } from "node:fs";
 import { resolve, join, extname, relative } from "node:path";
 import {
+  AffirmedXmlConfigurationType,
   PostmanCollectionFolderType,
   PostmanCollectionItemType,
+  XmlConfigurationType,
   XpgConfigurationType,
 } from "../types";
 import { pathToFileURL } from "node:url";
+import { emitWarning } from "node:process";
 
 // XML parser setup
 const parser = new XMLParser({
@@ -31,7 +34,7 @@ const getVariableOrBasePath = (
 
 const findFiles = (
   dir: string,
-  callback: (dir: string, file: string) => void
+  callback: (dir: string, file: string) => boolean | void
 ) => {
   const files = readdirSync(dir, { withFileTypes: true });
 
@@ -40,7 +43,10 @@ const findFiles = (
     if (file.isDirectory()) {
       findFiles(fullPath, callback);
     } else {
-      callback(dir, file.name);
+      let toContinue = callback(dir, file.name);
+      if (toContinue === false) {
+        continue;
+      }
     }
   }
 };
@@ -93,6 +99,62 @@ const formIndividualRequest = (
   };
 };
 
+const convertXmlToJson = (filePath: string) => {
+  try {
+    const xmlContent = readFileSync(filePath, "utf-8");
+    const jsonContent = parser.parse(xmlContent);
+    return jsonContent;
+  } catch (error) {
+    throw new Error(`Error reading file contents of xml ${filePath}`);
+    return undefined;
+  }
+};
+
+const getDefaultXmlConfig = (): AffirmedXmlConfigurationType => {
+  return {
+    interfaceTag: "ns:interface",
+    methodTag: "method",
+    queryTag: "query_param",
+  };
+};
+
+const processXmlConfig = (
+  xmlConfig: Partial<XmlConfigurationType>
+): AffirmedXmlConfigurationType => {
+  const defaultConfigurations = getDefaultXmlConfig();
+  return {
+    ...defaultConfigurations,
+    ...xmlConfig,
+  } as AffirmedXmlConfigurationType;
+};
+
+type extractXmlContentsType =
+  | undefined
+  | {
+      interfaceData: Record<string, any>;
+      methodData: any[];
+    };
+const extractXmlContents = (
+  jsonContent: any,
+  xmlConfig: AffirmedXmlConfigurationType,
+  file: string
+): extractXmlContentsType => {
+  let interfaceData = jsonContent[xmlConfig.interfaceTag];
+
+  if (!interfaceData || !interfaceData.name) {
+    console.error(
+      `Warning: Skipping file '${file}', no <${xmlConfig.interfaceTag}> found!`
+    );
+    return undefined;
+  }
+  let methodData = interfaceData[xmlConfig.methodTag];
+
+  return {
+    interfaceData,
+    methodData,
+  };
+};
+
 interface PostmanCollectionType {
   info: Record<"name" | "schema", string>;
   item: PostmanCollectionFolderType[];
@@ -104,69 +166,80 @@ export const formServiceRoutines = ({
 }: {
   configuration: XpgConfigurationType;
 }) => {
-  const { variables = {}, modules = [] } = configuration;
-  const serviceRoutines: PostmanCollectionType = {
-    info: {
-      name: "BIOP_SUBSCRIBER",
-      schema:
-        "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
-    },
-    item: [],
-  };
+  try {
+    const { variables = {}, modules = [], xml = {} } = configuration;
+    let xmlConfig = xml;
+    if (xmlConfig === undefined) {
+      xmlConfig = getDefaultXmlConfig();
+    } else {
+      xmlConfig = processXmlConfig(xmlConfig);
+    }
 
-  for (const configs of modules) {
-    // const moduleRecords = {};
-    const { directory, name, prefix, baseUrl } = configs;
-    findFiles(directory, (dir: string, file: string) => {
-      const relativeDirectoryFromPath = relative(directory, dir);
+    const serviceRoutines: PostmanCollectionType = {
+      info: {
+        name: "BIOP_SUBSCRIBER",
+        schema:
+          "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+      },
+      item: [],
+    };
 
-      if (extname(file) === ".xml") {
+    for (const configs of modules) {
+      const { directory, name, prefix, baseUrl } = configs;
+      findFiles(directory, (dir: string, file: string) => {
         const filePath = join(dir, file);
-        const xmlContent = readFileSync(filePath, "utf-8");
-        const jsonObj = parser.parse(xmlContent);
+        const relativeDirectoryFromPath = relative(directory, dir);
 
-        // Access interface
-        const interfaceData = jsonObj["ns:interface"];
-        if (!interfaceData || !interfaceData.name) {
-          console.warn(`Skipping file ${file}, no <ns:interface> found`);
-          return;
-        }
+        if (extname(file) === ".xml") {
+          const jsonContent = convertXmlToJson(filePath);
+          const extractedContents = extractXmlContents(
+            jsonContent,
+            xmlConfig as AffirmedXmlConfigurationType,
+            file
+          );
 
-        let folderName = interfaceData.name as string;
+          // returns from callback and continues the loop
+          if (extractedContents === undefined) {
+            return false;
+          }
+          const { interfaceData = {}, methodData = [] } = extractedContents;
 
-        if (relativeDirectoryFromPath !== "") {
-          folderName = join(relativeDirectoryFromPath, folderName);
-        }
-        let record: PostmanCollectionFolderType = {
-          name: folderName,
-          item: [],
-          event: [],
-        };
+          let folderName = interfaceData.name as string;
 
-        const methods = interfaceData.method;
-        if (Array.isArray(methods)) {
-          methods.forEach((method) => {
-            let basePath = getVariableOrBasePath(configs.baseUrl, variables);
+          if (relativeDirectoryFromPath !== "") {
+            folderName = join(relativeDirectoryFromPath, folderName);
+          }
 
+          let record: PostmanCollectionFolderType = {
+            name: folderName,
+            item: [],
+            event: [],
+          };
+
+          methodData.forEach((method) => {
+            let basePath = getVariableOrBasePath(baseUrl, variables);
             let rec = formIndividualRequest(interfaceData, method, basePath);
+
             record.item.push(rec);
           });
+          serviceRoutines.item.push(record);
         }
-        serviceRoutines.item.push(record);
-      }
-    });
-  }
-
-  if (Object.keys(variables).length > 0) {
-    let envVariables = [];
-    for (const [key, value] of Object.entries(variables)) {
-      envVariables.push({
-        key,
-        value,
       });
     }
-    serviceRoutines.variable = envVariables;
-  }
 
-  return serviceRoutines;
+    if (Object.keys(variables).length > 0) {
+      let envVariables = [];
+      for (const [key, value] of Object.entries(variables)) {
+        envVariables.push({
+          key,
+          value,
+        });
+      }
+      serviceRoutines.variable = envVariables;
+    }
+
+    return serviceRoutines;
+  } catch (error) {
+    console.error(error);
+  }
 };
