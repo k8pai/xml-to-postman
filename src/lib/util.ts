@@ -142,6 +142,7 @@ export const formServiceRoutines = ({
           item: [],
           event: [],
         };
+
         const methods = interfaceData.method;
         if (Array.isArray(methods)) {
           methods.forEach((method) => {
