@@ -1,6 +1,6 @@
 {
   "name": "xml-to-postman",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a simple package to parse xml files to a postman collection.",
   "keywords": [
     "xml-to-postman-collection"
