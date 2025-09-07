@@ -155,6 +155,16 @@ const extractJsonContents = (
   };
 };
 
+const formPostmanCollectionInfo = ({
+  name,
+  version,
+}: Pick<XpgConfigurationType, "name" | "version">) => {
+  return {
+    name,
+    schema: `https://schema.getpostman.com/json/collection/v${version}.0/collection.json`,
+  };
+};
+
 interface PostmanCollectionType {
   info: Record<"name" | "schema", string>;
   item: PostmanCollectionFolderType[];
@@ -167,7 +177,13 @@ export const formServiceRoutines = ({
   configuration: XpgConfigurationType;
 }) => {
   try {
-    const { variables = {}, modules = [], xml = {} } = configuration;
+    const {
+      name,
+      version,
+      variables = {},
+      modules = [],
+      xml = {},
+    } = configuration;
     let xmlConfig = xml;
     if (xmlConfig === undefined) {
       xmlConfig = getDefaultXmlConfig();
@@ -176,11 +192,7 @@ export const formServiceRoutines = ({
     }
 
     const serviceRoutines: PostmanCollectionType = {
-      info: {
-        name: "BIOP_SUBSCRIBER",
-        schema:
-          "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
-      },
+      info: formPostmanCollectionInfo({ name, version }),
       item: [],
     };
 
@@ -204,8 +216,8 @@ export const formServiceRoutines = ({
           }
           const { interfaceData = {}, methodData = [] } = extractedContents;
 
+          // forming folders and appointing each methods of the interface to the item array.
           let folderName = interfaceData.name as string;
-
           if (relativeDirectoryFromPath !== "") {
             folderName = join(relativeDirectoryFromPath, folderName);
           }
@@ -216,12 +228,23 @@ export const formServiceRoutines = ({
             event: [],
           };
 
-          methodData.forEach((method) => {
+          if (Array.isArray(methodData) && methodData.length > 0) {
+            methodData.forEach((method) => {
+              let basePath = getVariableOrBasePath(baseUrl, variables);
+              let rec = formIndividualRequest(interfaceData, method, basePath);
+
+              record.item.push(rec);
+            });
+          } else if (typeof methodData === "object") {
             let basePath = getVariableOrBasePath(baseUrl, variables);
-            let rec = formIndividualRequest(interfaceData, method, basePath);
+            let rec = formIndividualRequest(
+              interfaceData,
+              methodData,
+              basePath
+            );
 
             record.item.push(rec);
-          });
+          }
           serviceRoutines.item.push(record);
         }
       });
