@@ -31,7 +31,7 @@ const getVariableOrBasePath = (
 
 const findFiles = (
   dir: string,
-  callback: (dir: string, filePath: string) => void
+  callback: (dir: string, file: string) => void
 ) => {
   const files = readdirSync(dir, { withFileTypes: true });
 
