@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import fs, { writeFileSync, existsSync } from "fs";
-import path, { join, dirname } from "path";
+import { writeFileSync, existsSync } from "fs";
+import { join, dirname } from "path";
 import { Command } from "commander";
 import { XpgConfigurationSchema } from "@/types";
 import { formServiceRoutines } from "@/lib";
@@ -37,25 +37,29 @@ const findConfigFile = async (
   throw new Error(`Config file not found`);
 };
 
-try {
-  let configPath = options.config || (await findConfigFile(process.cwd()));
-  let configurations = await loadConfig(configPath);
-  let output_file = options.outfile;
-  const result = XpgConfigurationSchema.strict().safeParse(configurations);
+const main = async () => {
+  try {
+    let configPath = options.config || (await findConfigFile(process.cwd()));
+    let configurations = await loadConfig(configPath);
+    let output_file = options.outfile;
+    const result = XpgConfigurationSchema.strict().safeParse(configurations);
 
-  if (result.success === true) {
-    const response = formServiceRoutines({ configuration: result.data });
-    if (output_file === undefined) {
-      output_file = result.data.name.endsWith(".json")
-        ? result.data.name
-        : `${result.data.name}.json`;
+    if (result.success === true) {
+      const response = formServiceRoutines({ configuration: result.data });
+      if (output_file === undefined) {
+        output_file = result.data.name.endsWith(".json")
+          ? result.data.name
+          : `${result.data.name}.json`;
+      }
+      writeFileSync(output_file, JSON.stringify(response, null, 2));
+    } else {
+      const pretty = z.prettifyError(result.error);
+      console.log("Invalid configuration!!!");
     }
-    writeFileSync(output_file, JSON.stringify(response, null, 2));
-  } else {
-    const pretty = z.prettifyError(result.error);
-    console.log("Invalid configuration!!!");
+  } catch (e: any) {
+    console.error(e.message);
+    process.exit(1);
   }
-} catch (e: any) {
-  console.error(e.message);
-  process.exit(1);
-}
+};
+
+main();
