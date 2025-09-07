@@ -1,6 +1,6 @@
 {
-  "name": "xml-to-postman",
-  "version": "1.0.2",
+  "name": "@k8pai/xml-to-postman",
+  "version": "1.0.3",
   "description": "a simple package to parse xml files to a postman collection.",
   "keywords": [
     "xml-to-postman-collection"
@@ -32,5 +32,8 @@
     "commander": "^14.0.0",
     "fast-xml-parser": "^5.2.5",
     "zod": "^4.1.5"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
