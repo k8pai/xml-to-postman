@@ -251,14 +251,12 @@ export const formServiceRoutines = ({
     }
 
     if (Object.keys(variables).length > 0) {
-      let envVariables = [];
-      for (const [key, value] of Object.entries(variables)) {
-        envVariables.push({
+      serviceRoutines.variable = Object.entries(variables).map(
+        ([key, value]) => ({
           key,
           value,
-        });
-      }
-      serviceRoutines.variable = envVariables;
+        })
+      );
     }
 
     return serviceRoutines;
