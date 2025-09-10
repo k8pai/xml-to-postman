@@ -70,14 +70,14 @@ const formIndividualRequest = (
       params.push({
         key: param.name,
         value: "",
-        disabled: param.mandatory === "false" ? true : false,
+        disabled: param.mandatory === true ? false : true,
       });
     });
   } else if (method.query_param && typeof method.query_param === "object") {
     params.push({
       key: method.query_param.name,
       value: "",
-      disabled: method.query_param.mandatory === "false" ? true : false,
+      disabled: method.query_param.mandatory === true ? false : true,
     });
   }
 
