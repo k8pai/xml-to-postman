@@ -51,12 +51,15 @@ const findFiles = (
   }
 };
 
-const formEndpointPath = (
-  basePath: string,
-  interfaceName: string,
-  methodName: string
-) => {
-  return `${basePath}/${interfaceName}/${methodName}`;
+const formUrlFields = (basePath: string, path: string, method: string) => {
+  let url = [basePath, path, method].join("/");
+  let host = [basePath];
+  let paths = [path, method];
+  return {
+    url,
+    host,
+    paths,
+  };
 };
 
 const formIndividualRequest = (
@@ -81,16 +84,16 @@ const formIndividualRequest = (
     });
   }
 
-  let urlPath = formEndpointPath(basePath, interfaceData.name, method.name);
+  let partialUrl = formUrlFields(basePath, interfaceData.name, method.name);
   return {
     name: method.name,
     request: {
       method: method.http_method,
       header: [],
       url: {
-        raw: urlPath,
-        host: [basePath],
-        path: [interfaceData.name, method.name],
+        raw: partialUrl.url,
+        host: partialUrl.host,
+        path: partialUrl.paths,
         query: params,
       },
       description: method.documentation ?? "",
