@@ -93,7 +93,7 @@ const formIndividualRequest = (
         path: [interfaceData.name, method.name],
         query: params,
       },
-      description: "",
+      description: method.documentation ?? "",
     },
     response: [],
   };
@@ -112,8 +112,8 @@ const convertXmlToJson = (filePath: string) => {
 
 const getDefaultXmlConfig = (): AffirmedXmlConfigurationType => {
   return {
-    interfaceTag: "ns:interface",
-    methodTag: "method",
+    interfaceTag: ["ns:interface"],
+    methodTag: ["method"],
     queryTag: "query_param",
   };
 };
@@ -139,15 +139,37 @@ const extractJsonContents = (
   xmlConfig: AffirmedXmlConfigurationType,
   file: string
 ): extractJsonContentsType => {
-  let interfaceData = jsonContent[xmlConfig.interfaceTag];
+  let interfaceData = null,
+    methodData = null;
 
-  if (!interfaceData || !interfaceData.name) {
+  for (let validInterfaceTag of xmlConfig.interfaceTag) {
+    if (jsonContent[validInterfaceTag] && jsonContent[validInterfaceTag].name) {
+      interfaceData = jsonContent[validInterfaceTag];
+      for (let validMethodTag of xmlConfig.methodTag) {
+        if (interfaceData[validMethodTag]) {
+          methodData = interfaceData[validMethodTag];
+        }
+      }
+    }
+  }
+
+  if (interfaceData === null) {
     console.error(
-      `Warning: Skipping file '${file}', no <${xmlConfig.interfaceTag}> found!`
+      `Warning: Skipping file '${file}', no <${xmlConfig.interfaceTag.join(
+        ", "
+      )}> found!`
     );
     return undefined;
   }
-  let methodData = interfaceData[xmlConfig.methodTag];
+
+  if (methodData === null) {
+    console.error(
+      `Warning: Skipping file '${file}', no <${xmlConfig.methodTag.join(
+        ", "
+      )}> found!`
+    );
+    return undefined;
+  }
 
   return {
     interfaceData,

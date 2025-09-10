@@ -1,8 +1,12 @@
 import z from "zod";
 
 export const XmlConfigurationSchema = z.object({
-  interfaceTag: z.string().default("ns:interface").optional(),
-  methodTag: z.string().default("method").optional(),
+  interfaceTag: z
+    .union([z.string().transform((val) => [val]), z.array(z.string())])
+    .optional(),
+  methodTag: z
+    .union([z.string().transform((val) => [val]), z.array(z.string())])
+    .optional(),
   queryTag: z.string().default("query_param").optional(),
 });
 

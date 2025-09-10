@@ -7,6 +7,7 @@ import { XpgConfigurationSchema } from "@/types";
 import { formServiceRoutines } from "@/lib";
 import { loadConfig } from "@/lib";
 import z from "zod";
+import { trace } from "console";
 
 const program = new Command();
 
@@ -54,6 +55,7 @@ const main = async () => {
       writeFileSync(output_file, JSON.stringify(response, null, 2));
     } else {
       const pretty = z.prettifyError(result.error);
+      console.log("pretty ", pretty);
       console.log("Invalid configuration!!!");
     }
   } catch (e: any) {
