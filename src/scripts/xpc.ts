@@ -3,11 +3,10 @@
 import { writeFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { Command } from "commander";
-import { XpgConfigurationSchema } from "@/types";
+import { cliOptionsType, XpgConfigurationSchema } from "@/types";
 import { formServiceRoutines } from "@/lib";
 import { loadConfig } from "@/lib";
 import z from "zod";
-import { trace } from "console";
 
 const program = new Command();
 
@@ -16,11 +15,12 @@ program
   .description("CLI to generate the Import file for postman.")
   .option("-c, --config <path>", "specify config file path")
   .option("-o, --outfile <path>", "specify output file path")
+  .option("-v, --verbose", "specify whether to log verbose output")
   .helpOption("-h, --help", "show help");
 
 program.parse(process.argv);
 
-const options = program.opts();
+const options = program.opts<cliOptionsType>();
 
 const findConfigFile = async (
   dir: string,
@@ -46,7 +46,10 @@ const main = async () => {
     const result = XpgConfigurationSchema.strict().safeParse(configurations);
 
     if (result.success === true) {
-      const response = formServiceRoutines({ configuration: result.data });
+      const response = formServiceRoutines({
+        configuration: result.data,
+        cliOptions: options,
+      });
       if (output_file === undefined) {
         output_file = result.data.name.endsWith(".json")
           ? result.data.name
@@ -55,8 +58,8 @@ const main = async () => {
       writeFileSync(output_file, JSON.stringify(response, null, 2));
     } else {
       const pretty = z.prettifyError(result.error);
-      console.log("pretty ", pretty);
       console.log("Invalid configuration!!!");
+      console.log(pretty);
     }
   } catch (e: any) {
     console.error(e.message);

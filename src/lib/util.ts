@@ -3,13 +3,13 @@ import { readdirSync, readFileSync } from "node:fs";
 import { resolve, join, extname, relative } from "node:path";
 import {
   AffirmedXmlConfigurationType,
+  cliOptionsType,
   PostmanCollectionFolderType,
   PostmanCollectionItemType,
   XmlConfigurationType,
   XpgConfigurationType,
 } from "../types";
 import { pathToFileURL } from "node:url";
-import { emitWarning } from "node:process";
 
 // XML parser setup
 const parser = new XMLParser({
@@ -140,13 +140,14 @@ type extractJsonContentsType =
 const extractJsonContents = (
   jsonContent: any,
   xmlConfig: AffirmedXmlConfigurationType,
-  file: string
+  file: string,
+  verbose: boolean
 ): extractJsonContentsType => {
   let interfaceData = null,
     methodData = null;
 
   for (let validInterfaceTag of xmlConfig.interfaceTag) {
-    if (jsonContent[validInterfaceTag] && jsonContent[validInterfaceTag].name) {
+    if (jsonContent[validInterfaceTag]) {
       interfaceData = jsonContent[validInterfaceTag];
       for (let validMethodTag of xmlConfig.methodTag) {
         if (interfaceData[validMethodTag]) {
@@ -157,20 +158,33 @@ const extractJsonContents = (
   }
 
   if (interfaceData === null) {
-    console.error(
-      `Warning: Skipping file '${file}', no <${xmlConfig.interfaceTag.join(
-        ", "
-      )}> found!`
-    );
+    if (verbose) {
+      console.error(
+        `Warning: Skipping file '${file}', no <${xmlConfig.interfaceTag.join(
+          ", "
+        )}> found!`
+      );
+    }
+    return undefined;
+  } else if (!interfaceData.name) {
+    if (verbose) {
+      console.error(
+        `Warning: Skipping file '${file}', no 'name' property for <${xmlConfig.interfaceTag.join(
+          " or "
+        )}> found!`
+      );
+    }
     return undefined;
   }
 
   if (methodData === null) {
-    console.error(
-      `Warning: Skipping file '${file}', no <${xmlConfig.methodTag.join(
-        ", "
-      )}> found!`
-    );
+    if (verbose) {
+      console.error(
+        `Warning: Skipping file '${file}', no <${xmlConfig.methodTag.join(
+          ", "
+        )}> found!`
+      );
+    }
     return undefined;
   }
 
@@ -198,8 +212,10 @@ interface PostmanCollectionType {
 
 export const formServiceRoutines = ({
   configuration,
+  cliOptions,
 }: {
   configuration: XpgConfigurationType;
+  cliOptions: cliOptionsType;
 }) => {
   try {
     const {
@@ -228,11 +244,15 @@ export const formServiceRoutines = ({
         const relativeDirectoryFromPath = relative(directory, dir);
 
         if (extname(file) === ".xml") {
+          if (cliOptions.verbose) {
+            console.log("processing xml file:", filePath);
+          }
           const jsonContent = convertXmlToJson(filePath);
           const extractedContents = extractJsonContents(
             jsonContent,
             xmlConfig as AffirmedXmlConfigurationType,
-            file
+            file,
+            cliOptions.verbose
           );
 
           // returns from callback and continues the loop

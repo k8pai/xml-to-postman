@@ -74,3 +74,10 @@ export interface PostmanCollectionFolderType {
   item: PostmanCollectionItemType[];
   event?: any[];
 }
+
+export interface cliOptionsType {
+  config: string;
+  outfile: string;
+  verbose: boolean;
+  help: boolean;
+}
