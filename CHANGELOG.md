@@ -1,5 +1,11 @@
 # xml-to-postman
 
+## 1.0.5
+
+### Patch Changes
+
+- cli tool includes verbose support
+
 ## 1.0.4
 
 ### Patch Changes
