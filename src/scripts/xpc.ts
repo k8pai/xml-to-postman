@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
-import { writeFileSync, existsSync } from "fs";
-import { join, dirname } from "path";
+import { writeFileSync, existsSync, mkdirSync } from "fs";
+import { dirname, join } from "path";
 import { Command } from "commander";
-import { cliOptionsType, XpgConfigurationSchema } from "@/types";
-import { formServiceRoutines } from "@/lib";
-import { loadConfig } from "@/lib";
+import { cliOptionsType, XpgConfigurationSchema } from "../types.js";
+import {
+  formPostmanEnvironmentFiles,
+  formServiceRoutines,
+  loadConfig,
+} from "../lib/index.js";
 import z from "zod";
 
 const program = new Command();
@@ -50,12 +53,28 @@ const main = async () => {
         configuration: result.data,
         cliOptions: options,
       });
+      const configuredOutputDirectory =
+        result.data.postman?.outputDirectory ?? "postman_collection";
       if (output_file === undefined) {
-        output_file = result.data.name.endsWith(".json")
+        const collectionFileName = result.data.name.endsWith(".json")
           ? result.data.name
           : `${result.data.name}.json`;
+        output_file = join(configuredOutputDirectory, collectionFileName);
+      } else if (dirname(output_file) === ".") {
+        output_file = join(configuredOutputDirectory, output_file);
       }
+
+      const outputDirectory = dirname(output_file);
+      mkdirSync(outputDirectory, { recursive: true });
+
       writeFileSync(output_file, JSON.stringify(response, null, 2));
+
+      for (const environmentFile of formPostmanEnvironmentFiles(result.data)) {
+        writeFileSync(
+          join(outputDirectory, environmentFile.fileName),
+          JSON.stringify(environmentFile.content, null, 2)
+        );
+      }
     } else {
       const pretty = z.prettifyError(result.error);
       console.log("Invalid configuration!!!");
